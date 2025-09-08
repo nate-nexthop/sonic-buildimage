@@ -29,6 +29,7 @@
 #include <linux/delay.h>
 #include <linux/dmi.h>
 #include <linux/kobject.h>
+#include <linux/version.h>
 #include "pddf_client_defs.h"
 #include "pddf_fan_defs.h"
 #include "pddf_fan_driver.h"
@@ -393,8 +394,7 @@ EXPORT_SYMBOL(get_fan_access_data);
 
 
 
-static int pddf_fan_probe(struct i2c_client *client,
-            const struct i2c_device_id *dev_id)
+static int pddf_fan_probe(struct i2c_client *client)
 {
     struct fan_data *data;
     int status=0,i,num, j=0;
@@ -413,7 +413,7 @@ static int pddf_fan_probe(struct i2c_client *client,
 
 	if (pddf_fan_ops.pre_probe)
 	{
-		status = (pddf_fan_ops.pre_probe)(client, dev_id);
+		status = (pddf_fan_ops.pre_probe)(client);
 		if (status != 0)
 			goto exit;
 	}
@@ -528,7 +528,7 @@ static int pddf_fan_probe(struct i2c_client *client,
 	/* Add a support for post probe function */
 	if (pddf_fan_ops.post_probe)
 	{
-		status = (pddf_fan_ops.post_probe)(client, dev_id);
+		status = (pddf_fan_ops.post_probe)(client);
 		if (status != 0)
 			goto exit_remove;
 	}
@@ -609,7 +609,11 @@ static struct i2c_driver pddf_fan_driver = {
     .driver = {
         .name     = DRVNAME,
     },
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+    .probe_new    = pddf_fan_probe,
+#else
     .probe        = pddf_fan_probe,
+#endif
     .remove       = pddf_fan_remove,
     .id_table     = pddf_fan_id,
     .address_list = normal_i2c,

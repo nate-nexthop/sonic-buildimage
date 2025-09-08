@@ -26,29 +26,22 @@ SERVICE_DIR := service
 
 %:
 	echo =================RUNNING $@=============
-	dh $@ --with systemd,python2,python3 --buildsystem=pybuild
+	dh $@ --with python3 --buildsystem=pybuild
 
-clean:
+override_dh_auto_clean:
 	echo ============CLEANING=================
-	dh_testdir
-	dh_testroot
 	dh_clean
 	make -C $(KERNEL_SRC)/build M=$(MOD_SRC_DIR) clean
 
-build:
+override_dh_auto_build:
+	echo ============BUILDING=================
 	set -e; \
 	make modules -C $(KERNEL_SRC)/build M=$(MOD_SRC_DIR); \
 	$(PYTHON) -m build --wheel --no-isolation $(MOD_SRC_DIR); \
 	set +e
 
-binary: binary-arch binary-indep
-	# Nothing to do
-
-binary-arch: 
-	# Nothing to do
-
-binary-indep:
-	dh_testdir
+override_dh_auto_install:
+	echo ============INSTALLING=================
 	dh_installdirs
 	dh_installdirs -p$(PACKAGE_PRE_NAME) $(KERNEL_SRC)/$(INSTALL_MOD_DIR); \
 	dh_installdirs -p$(PACKAGE_PRE_NAME) usr/local/bin; \
@@ -63,20 +56,7 @@ binary-indep:
 	$(PIP) install --root=$(MOD_SRC_DIR)/debian/$(PACKAGE_PRE_NAME) $(MOD_SRC_DIR)/; \
 	set +e
 
-	# Resuming debhelper scripts
-	dh_testroot
-	dh_install
-	dh_installchangelogs
-	dh_installdocs
-	dh_systemd_enable
-	dh_installinit
-	dh_systemd_start
-	dh_link
-	dh_fixperms
-	dh_compress
-	dh_strip
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-.PHONY: build binary binary-arch binary-indep clean
+override_dh_usrlocal:
+# We're installing to /usr/local/ which Debian forbids for their own packages, but it's intentional.
+
+.PHONY: override_dh_auto_build override_dh_auto_clean override_dh_auto_install

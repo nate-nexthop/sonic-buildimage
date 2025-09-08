@@ -29,6 +29,7 @@
 #include <linux/delay.h>
 #include <linux/dmi.h>
 #include <linux/kobject.h>
+#include <linux/version.h>
 #include "pddf_client_defs.h"
 #include "pddf_xcvr_defs.h"
 #include "pddf_xcvr_api.h"
@@ -91,8 +92,7 @@ static const struct attribute_group xcvr_group = {
     .attrs = xcvr_attributes,
 };
 
-static int xcvr_probe(struct i2c_client *client,
-            const struct i2c_device_id *dev_id)
+static int xcvr_probe(struct i2c_client *client)
 {
     struct xcvr_data *data;
     int status =0;
@@ -107,7 +107,7 @@ static int xcvr_probe(struct i2c_client *client,
 
     if (pddf_xcvr_ops.pre_probe)
     {
-        status = (pddf_xcvr_ops.pre_probe)(client, dev_id);
+        status = (pddf_xcvr_ops.pre_probe)(client);
         if (status != 0)
             goto exit;
     }
@@ -171,7 +171,7 @@ static int xcvr_probe(struct i2c_client *client,
     /* Add a support for post probe function */
     if (pddf_xcvr_ops.post_probe)
     {
-        status = (pddf_xcvr_ops.post_probe)(client, dev_id);
+        status = (pddf_xcvr_ops.post_probe)(client);
         if (status != 0)
             goto exit_remove;
     }
@@ -242,7 +242,11 @@ static struct i2c_driver xcvr_driver = {
         .name     = "xcvr",
         .owner    = THIS_MODULE,
     },
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+    .probe_new    = xcvr_probe,
+#else
     .probe        = xcvr_probe,
+#endif
     .remove       = xcvr_remove,
     .id_table     = xcvr_ids,
 };

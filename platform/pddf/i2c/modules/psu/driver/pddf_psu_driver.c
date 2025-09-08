@@ -29,6 +29,7 @@
 #include <linux/delay.h>
 #include <linux/dmi.h>
 #include <linux/kobject.h>
+#include <linux/version.h>
 #include "pddf_client_defs.h"
 #include "pddf_psu_defs.h"
 #include "pddf_psu_driver.h"
@@ -196,8 +197,7 @@ static bool skip_unsupported_psu_attribute(PSU_DATA_ATTR *data_attr,
 	return false;
 }
 
-static int psu_probe(struct i2c_client *client,
-            const struct i2c_device_id *dev_id)
+static int psu_probe(struct i2c_client *client)
 {
     struct psu_data *data;
     int status =0;
@@ -215,7 +215,7 @@ static int psu_probe(struct i2c_client *client,
 
 	if (pddf_psu_ops.pre_probe)
     {
-        status = (pddf_psu_ops.pre_probe)(client, dev_id);
+        status = (pddf_psu_ops.pre_probe)(client);
         if (status != 0)
             goto exit;
     }
@@ -314,7 +314,7 @@ static int psu_probe(struct i2c_client *client,
 	/* Add a support for post probe function */
     if (pddf_psu_ops.post_probe)
     {
-        status = (pddf_psu_ops.post_probe)(client, dev_id);
+        status = (pddf_psu_ops.post_probe)(client);
         if (status != 0)
             goto exit_remove;
     }
@@ -399,7 +399,11 @@ static struct i2c_driver psu_driver = {
     .driver = {
         .name     = "psu",
     },
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+    .probe_new    = psu_probe,
+#else
     .probe        = psu_probe,
+#endif
     .remove       = psu_remove,
     .id_table     = psu_id,
     .address_list = normal_i2c,
