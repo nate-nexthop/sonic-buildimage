@@ -412,7 +412,6 @@ static int pddf_fan_probe(struct i2c_client *client)
 	char new_duplicate_str[ATTR_NAME_LEN] = "";
 	char new_default_str[ATTR_NAME_LEN] = "";
     int idx = 0;
-    struct i2c_device_id *dev_id;
 
 	if (client == NULL) {
         printk("NULL Client.. \n");
@@ -421,8 +420,7 @@ static int pddf_fan_probe(struct i2c_client *client)
 
 	if (pddf_fan_ops.pre_probe)
 	{
-        dev_id = i2c_match_id(pddf_fan_id, client);
-		status = (pddf_fan_ops.pre_probe)(client, dev_id);
+		status = (pddf_fan_ops.pre_probe)(client);
 		if (status != 0)
 			goto exit;
 	}
@@ -537,8 +535,7 @@ static int pddf_fan_probe(struct i2c_client *client)
 	/* Add a support for post probe function */
 	if (pddf_fan_ops.post_probe)
 	{
-        dev_id = i2c_match_id(pddf_fan_id, client);
-		status = (pddf_fan_ops.post_probe)(client, dev_id);
+		status = (pddf_fan_ops.post_probe)(client);
 		if (status != 0)
 			goto exit_remove;
 	}

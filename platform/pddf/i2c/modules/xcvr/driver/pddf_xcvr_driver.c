@@ -110,7 +110,6 @@ static int xcvr_probe(struct i2c_client *client)
     int i,j,num;
     XCVR_PDATA *xcvr_platform_data;
     XCVR_ATTR *attr_data;
-    struct i2c_device_id *dev_id;
 
     if (client == NULL) {
         pddf_dbg(XCVR, "NULL Client.. \n");
@@ -119,8 +118,7 @@ static int xcvr_probe(struct i2c_client *client)
 
     if (pddf_xcvr_ops.pre_probe)
     {
-        dev_id = i2c_match_id(xcvr_ids, client);
-        status = (pddf_xcvr_ops.pre_probe)(client, dev_id);
+        status = (pddf_xcvr_ops.pre_probe)(client);
         if (status != 0)
             goto exit;
     }
@@ -184,8 +182,7 @@ static int xcvr_probe(struct i2c_client *client)
     /* Add a support for post probe function */
     if (pddf_xcvr_ops.post_probe)
     {
-        dev_id = i2c_match_id(xcvr_ids, client);
-        status = (pddf_xcvr_ops.post_probe)(client, dev_id);
+        status = (pddf_xcvr_ops.post_probe)(client);
         if (status != 0)
             goto exit_remove;
     }

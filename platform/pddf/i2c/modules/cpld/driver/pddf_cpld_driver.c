@@ -20,6 +20,7 @@
 #include <linux/slab.h>
 #include <linux/list.h>
 #include <linux/dmi.h>
+#include <linux/version.h>
 #include "pddf_cpld_defs.h"
 
 extern PDDF_CPLD_DATA pddf_cpld_data;
@@ -260,7 +261,11 @@ static struct i2c_driver board_i2c_cpld_driver = {
 	.driver = {
 		.name = "i2c_cpld",
 	},
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+	.probe_new	= board_i2c_cpld_probe,
+#else
 	.probe		= board_i2c_cpld_probe,
+#endif
 	.remove	   	= board_i2c_cpld_remove,
 	.id_table	= board_i2c_cpld_id,
 	.address_list = normal_i2c,

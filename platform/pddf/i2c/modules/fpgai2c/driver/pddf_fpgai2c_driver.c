@@ -19,6 +19,7 @@
 #include <linux/slab.h>
 #include <linux/list.h>
 #include <linux/dmi.h>
+#include <linux/version.h>
 #include "pddf_fpgai2c_defs.h"
 
 extern PDDF_FPGAI2C_DATA pddf_fpgai2c_data;
@@ -200,7 +201,11 @@ static struct i2c_driver board_i2c_fpga_driver = {
 	.driver = {
 		.name = "i2c_fpga",
 	},
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+	.probe_new	= board_i2c_fpga_probe,
+#else
 	.probe		= board_i2c_fpga_probe,
+#endif
 	.remove	   	= board_i2c_fpga_remove,
 	.id_table	= board_i2c_fpga_id,
 	.address_list = normal_i2c,

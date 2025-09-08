@@ -219,7 +219,6 @@ static int psu_probe(struct i2c_client *client)
     PSU_DATA_ATTR *data_attr;
     PSU_SYSFS_ATTR_DATA_ENTRY *sysfs_data_entry;
     char new_str[ATTR_NAME_LEN] = "";
-    struct i2c_device_id *dev_id;
 
 
 	if (client == NULL) {
@@ -229,8 +228,7 @@ static int psu_probe(struct i2c_client *client)
 
 	if (pddf_psu_ops.pre_probe)
     {
-        dev_id = i2c_match_id(psu_id, client);
-        status = (pddf_psu_ops.pre_probe)(client, dev_id);
+        status = (pddf_psu_ops.pre_probe)(client);
         if (status != 0)
             goto exit;
     }
@@ -329,8 +327,7 @@ static int psu_probe(struct i2c_client *client)
 	/* Add a support for post probe function */
     if (pddf_psu_ops.post_probe)
     {
-        dev_id = i2c_match_id(psu_id, client);
-        status = (pddf_psu_ops.post_probe)(client, dev_id);
+        status = (pddf_psu_ops.post_probe)(client);
         if (status != 0)
             goto exit_remove;
     }
