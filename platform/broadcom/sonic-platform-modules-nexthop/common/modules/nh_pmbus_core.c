@@ -27,6 +27,7 @@
 #include <linux/regulator/machine.h>
 #include <linux/of.h>
 #include <linux/thermal.h>
+#include <linux/version.h>
 #include "nh_pmbus.h"
 
 /*
@@ -1278,7 +1279,11 @@ struct pmbus_thermal_data {
 
 static int pmbus_thermal_get_temp(struct thermal_zone_device *tz, int *temp)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 15, 0)
 	struct pmbus_thermal_data *tdata = tz->devdata;
+#else
+	struct pmbus_thermal_data *tdata = thermal_zone_device_priv(tz);
+#endif
 	struct pmbus_sensor *sensor = tdata->sensor;
 	struct pmbus_data *pmbus_data = tdata->pmbus_data;
 	struct i2c_client *client = to_i2c_client(pmbus_data->dev);
